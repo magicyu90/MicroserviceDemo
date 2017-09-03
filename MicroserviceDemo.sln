@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.3
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "User.API", "User.API\User.API.csproj", "{6C6530EE-147D-474F-BBFD-E18113F68515}"
 EndProject
@@ -15,7 +15,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Event", "Event", "{ACF68CEB
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventBusRabbitMQ", "EventBusRabbitMQ\EventBusRabbitMQ.csproj", "{C1B921BC-8B89-4083-951E-D7E6C8A1CA38}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Organization.API", "Organization.API\Organization.API.csproj", "{32A1C93E-9AFB-4BC6-8853-F0369734CDE2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Organization.API", "Organization.API\Organization.API.csproj", "{32A1C93E-9AFB-4BC6-8853-F0369734CDE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CounterService", "CounterService\CounterService.csproj", "{31E7DC1C-E98D-4E90-BDF5-0CA8922A4935}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{32A1C93E-9AFB-4BC6-8853-F0369734CDE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32A1C93E-9AFB-4BC6-8853-F0369734CDE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32A1C93E-9AFB-4BC6-8853-F0369734CDE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31E7DC1C-E98D-4E90-BDF5-0CA8922A4935}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31E7DC1C-E98D-4E90-BDF5-0CA8922A4935}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31E7DC1C-E98D-4E90-BDF5-0CA8922A4935}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31E7DC1C-E98D-4E90-BDF5-0CA8922A4935}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,6 +55,7 @@ Global
 		{ACF68CEB-315C-4C32-9BAC-F281D22C1DBB} = {49F3A2BC-CEC1-4C5F-BCA8-98BAF35D2CDF}
 		{C1B921BC-8B89-4083-951E-D7E6C8A1CA38} = {ACF68CEB-315C-4C32-9BAC-F281D22C1DBB}
 		{32A1C93E-9AFB-4BC6-8853-F0369734CDE2} = {81F79BBD-7187-4C4A-853C-3133120DBD10}
+		{31E7DC1C-E98D-4E90-BDF5-0CA8922A4935} = {81F79BBD-7187-4C4A-853C-3133120DBD10}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {512E4C22-2924-43FE-81FA-6DB65CED4F41}

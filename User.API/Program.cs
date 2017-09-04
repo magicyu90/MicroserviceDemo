@@ -28,8 +28,9 @@ namespace User.API
                 })
                 .ConfigureLogging((hostingContext, logging) =>
                 {
-                    logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
-                    logging.AddConsole();
+                    //logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+
+                    logging.AddFilter("Microsoft", LogLevel.Warning).AddFilter("System", LogLevel.Warning).AddConsole();
                     logging.AddDebug();
                 })
                 .UseStartup<Startup>()

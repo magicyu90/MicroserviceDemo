@@ -32,17 +32,14 @@ namespace User.API.Controllers
         [HttpDelete("{id}")]
         public JsonResult Delete(int id)
         {
-            //var userToDelete = await _userRepository.GetUserByIdAsync(id);
-            //await _userRepository.DeleteUserAysncAsync(id);
-
-            //var eventMessage = new DeleteUserEvent(id, userToDelete.UserName, userToDelete.Mobile);
-            //var eventMessage = new DeleteUserEvent(id, "HugoSHEN", "13011595611");
-            //_eventBus.Publish(eventMessage);
-
             _logger.LogInformation($"Delete id:{id}");
 
-            var testEventMessage = new TestEvent("This is the test message by Hugo");
+            var testEventMessage = new IntegrationEvents.Events.TestEvent("This is the test message for test event by Hugo");
             _eventBus.Publish(testEventMessage);
+
+            var testEvent2Message = new IntegrationEvents.Events.TestEvent2("This is the test message for test event2 by Hugo");
+            _eventBus.Publish(testEvent2Message);
+
 
             return Json("OK");
 

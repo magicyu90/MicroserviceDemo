@@ -1,7 +1,7 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using IntegrationEvents.EventHandlers;
-using IntegrationEvents.Events;
+using EventBusConsole.EventHandlers;
+using EventBusConsole.Events;
 using Microservice.BuildingBlocks.EventBus;
 using Microservice.BuildingBlocks.EventBus.Abstractions;
 using Microservice.BuildingBlocks.EventBusRabbitMQ;
@@ -32,6 +32,7 @@ namespace EventBusConsole
             services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
 
             services.AddTransient<TestEventHandler>();
+            services.AddTransient<TestEvent2Handler>();
 
             var containerBuilder = new ContainerBuilder();
 
@@ -46,6 +47,7 @@ namespace EventBusConsole
 
             var eventBus = serviceProvider.GetRequiredService<IEventBus>();
             eventBus.Subscribe<TestEvent, TestEventHandler>();
+            eventBus.Subscribe<TestEvent2, TestEvent2Handler>();
 
             logger.LogInformation("Program starting...");
 

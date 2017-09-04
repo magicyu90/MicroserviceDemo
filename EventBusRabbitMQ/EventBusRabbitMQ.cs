@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Microservice.BuildingBlocks.EventBusRabbitMQ
 {
-    public class EventBusRabbitMQ : IEventBus
+    public class EventBusRabbitMQ : IEventBus, IDisposable
     {
         const string BROKER_NAME = "microservice_event_bus";
 
@@ -130,7 +130,7 @@ namespace Microservice.BuildingBlocks.EventBusRabbitMQ
             channel.ExchangeDeclare(exchange: BROKER_NAME, type: "direct");
 
             // 声明队列
-            channel.QueueDeclare(queue: _queueName, durable: true, exclusive: false);
+            channel.QueueDeclare(_queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
 
             //_queueName = channel.QueueDeclare().QueueName;
 
@@ -138,6 +138,7 @@ namespace Microservice.BuildingBlocks.EventBusRabbitMQ
             consumer.Received += async (model, e) =>
             {
                 var eventName = e.RoutingKey;
+                _logger.LogInformation($"Current eventName:{eventName}");
                 var message = Encoding.UTF8.GetString(e.Body);
 
                 // 通过Autofac去找绑定的EventHandler
@@ -161,7 +162,7 @@ namespace Microservice.BuildingBlocks.EventBusRabbitMQ
         /// <param name="eventName"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public async Task ProcessEvent(string eventName, string message)
+        private async Task ProcessEvent(string eventName, string message)
         {
 
             if (_subsManager.HasSubscriptionsForEvent(eventName))
@@ -182,6 +183,16 @@ namespace Microservice.BuildingBlocks.EventBusRabbitMQ
                 }
             }
 
+        }
+
+        public void Dispose()
+        {
+            if (_channel != null)
+            {
+                _channel.Dispose();
+            }
+
+            _subsManager.Clear();
         }
     }
 }

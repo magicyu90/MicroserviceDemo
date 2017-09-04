@@ -56,7 +56,7 @@ namespace User.API
             containerBuilder.Populate(services);
             var container = containerBuilder.Build();
             var serviceProvider = new AutofacServiceProvider(container);
-                       
+
             // 通过serviceProvider得到Autofac容器并获取相关服务
             var logger = serviceProvider.GetService<ILoggerFactory>().CreateLogger<Startup>();
 
@@ -80,7 +80,7 @@ namespace User.API
 
             app.UseMvc();
 
-           // ConfigureEventBus(app);
+          //  ConfigureEventBus(app);
         }
 
 
@@ -93,14 +93,15 @@ namespace User.API
             services.AddSingleton<IEventBus, EventBusRabbitMQ>();
             services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
 
-          //  services.AddTransient<TestEventHandler>();
+            //   services.AddTransient<TestEventHandler>();
+            //  services.AddTransient<TestEvent2Handler>();
         }
 
 
         protected virtual void ConfigureEventBus(IApplicationBuilder app)
         {
-            var eventBus = app.ApplicationServices.GetService<IEventBus>();
-            eventBus.Subscribe<TestEvent, TestEventHandler>();
+            var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
+          
         }
 
 

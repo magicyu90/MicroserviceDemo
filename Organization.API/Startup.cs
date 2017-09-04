@@ -66,6 +66,7 @@ namespace Organization.API
 
             services.AddTransient<DeleteUserEventHandler>();
             services.AddTransient<TestEventHandler>();
+            services.AddTransient<TestEvent2Handler>();
         }
 
         protected virtual void ConfigureEventBus(IApplicationBuilder app)
@@ -73,6 +74,7 @@ namespace Organization.API
             var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
             eventBus.Subscribe<DeleteUserEvent, DeleteUserEventHandler>();
             eventBus.Subscribe<TestEvent, TestEventHandler>();
+            eventBus.Subscribe<TestEvent2, TestEvent2Handler>();
         }
     }
 }

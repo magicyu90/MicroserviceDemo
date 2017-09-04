@@ -80,7 +80,7 @@ namespace User.API
 
             app.UseMvc();
 
-            ConfigureEventBus(app);
+           // ConfigureEventBus(app);
         }
 
 
@@ -93,7 +93,7 @@ namespace User.API
             services.AddSingleton<IEventBus, EventBusRabbitMQ>();
             services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
 
-            services.AddTransient<TestEventHandler>();
+          //  services.AddTransient<TestEventHandler>();
         }
 
 

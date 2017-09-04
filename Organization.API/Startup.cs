@@ -1,5 +1,7 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using IntegrationEvents.EventHandlers;
+using IntegrationEvents.Events;
 using Microservice.BuildingBlocks.EventBus;
 using Microservice.BuildingBlocks.EventBus.Abstractions;
 using Microservice.BuildingBlocks.EventBusRabbitMQ;
@@ -61,14 +63,16 @@ namespace Organization.API
         {
             services.AddSingleton<IEventBus, EventBusRabbitMQ>();
             services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
-            
+
             services.AddTransient<DeleteUserEventHandler>();
+            services.AddTransient<TestEventHandler>();
         }
 
         protected virtual void ConfigureEventBus(IApplicationBuilder app)
         {
             var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
             eventBus.Subscribe<DeleteUserEvent, DeleteUserEventHandler>();
+            eventBus.Subscribe<TestEvent, TestEventHandler>();
         }
     }
 }

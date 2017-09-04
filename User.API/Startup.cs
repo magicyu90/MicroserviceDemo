@@ -13,6 +13,8 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using System;
 using User.API.Repositories;
+using IntegrationEvents.EventHandlers;
+using IntegrationEvents.Events;
 
 namespace User.API
 {
@@ -30,6 +32,8 @@ namespace User.API
         {
             services.AddMvc();
 
+            services.AddLogging();
+
             //var contextOptions = new DbContextOptionsBuilder<EfContext>().UseSqlServer(Configuration.GetConnectionString("User.API.DbConnStr")).Options;
 
             //services.AddSingleton(contextOptions).AddScoped<EfContext>();
@@ -38,31 +42,45 @@ namespace User.API
 
             services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
             {
-                var logger = sp.GetRequiredService<ILogger<DefaultRabbitMQPersisterConnection>>();
+                var _logger = sp.GetRequiredService<ILogger<DefaultRabbitMQPersisterConnection>>();
                 var factory = new ConnectionFactory() { HostName = "localhost" };
 
-                return new DefaultRabbitMQPersisterConnection(factory, logger);
+                return new DefaultRabbitMQPersisterConnection(factory, _logger);
             });
 
             RegisterEventBus(services);
 
             services.AddTransient<IUserRepository, UserRepository>();
 
-            var container = new ContainerBuilder();
-            container.Populate(services);
-            return new AutofacServiceProvider(container.Build());
+            var containerBuilder = new ContainerBuilder();
+            containerBuilder.Populate(services);
+            var container = containerBuilder.Build();
+            var serviceProvider = new AutofacServiceProvider(container);
+                       
+            // 通过serviceProvider得到Autofac容器并获取相关服务
+            var logger = serviceProvider.GetService<ILoggerFactory>().CreateLogger<Startup>();
+
+            logger.LogInformation("Configuring services...");
+
+            return serviceProvider;
 
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            var logger = loggerFactory.CreateLogger<Startup>();
+
+            logger.LogInformation("Configuring...");
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
             app.UseMvc();
+
+            ConfigureEventBus(app);
         }
 
 
@@ -74,6 +92,15 @@ namespace User.API
         {
             services.AddSingleton<IEventBus, EventBusRabbitMQ>();
             services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
+
+            services.AddTransient<TestEventHandler>();
+        }
+
+
+        protected virtual void ConfigureEventBus(IApplicationBuilder app)
+        {
+            var eventBus = app.ApplicationServices.GetService<IEventBus>();
+            eventBus.Subscribe<TestEvent, TestEventHandler>();
         }
 
 

@@ -23,7 +23,7 @@ namespace Microservice.BuildingBlocks.EventBusRabbitMQ
         private readonly string AUTOFAC_SCOPE_NAME = "microservice_event_bus";
 
         private IModel _channel;
-        private string _queueName;
+        private readonly string _queueName = "microservice_queue";
 
 
         public EventBusRabbitMQ(ILogger<EventBusRabbitMQ> logger, IEventBusSubscriptionsManager subsManager,
@@ -53,7 +53,7 @@ namespace Microservice.BuildingBlocks.EventBusRabbitMQ
 
                 if (_subsManager.IsEmpty)
                 {
-                    _queueName = string.Empty;
+                    // _queueName = string.Empty;
                     _channel.Close();
                 }
             }
@@ -129,7 +129,10 @@ namespace Microservice.BuildingBlocks.EventBusRabbitMQ
             // 声明直连交换器
             channel.ExchangeDeclare(exchange: BROKER_NAME, type: "direct");
 
-            _queueName = channel.QueueDeclare().QueueName;
+            // 声明队列
+            channel.QueueDeclare(queue: _queueName, durable: true, exclusive: false);
+
+            //_queueName = channel.QueueDeclare().QueueName;
 
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += async (model, e) =>

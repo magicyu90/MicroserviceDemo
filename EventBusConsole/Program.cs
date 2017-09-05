@@ -11,6 +11,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EventBusConsole
 {
@@ -19,6 +20,8 @@ namespace EventBusConsole
 
         private static string exchangeName = "test_exchange";
         private static string queueName = "microservice_queue";
+
+
         static void Main(string[] args)
         {
             var services = new ServiceCollection();
@@ -32,6 +35,8 @@ namespace EventBusConsole
 
                 return new DefaultRabbitMQPersisterConnection(factory, _logger);
             });
+
+            services.AddTransient<ICaculateService, CaculateService>();
 
             //services.AddSingleton<IEventBus, EventBusRabbitMQ>();
             //services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
@@ -47,17 +52,14 @@ namespace EventBusConsole
             var container = containerBuilder.Build();
             var serviceProvider = new AutofacServiceProvider(container);
 
-            //serviceProvider.GetService<ILoggerFactory>().AddConsole(LogLevel.Information);
-            //var logger = serviceProvider.GetService<ILoggerFactory>().CreateLogger<Program>();
+            serviceProvider.GetService<ILoggerFactory>().AddConsole(LogLevel.Information);
+            var logger = serviceProvider.GetService<ILoggerFactory>().CreateLogger<Program>();
 
             //var eventBus = serviceProvider.GetRequiredService<IEventBus>();
             //eventBus.Subscribe<TestEvent, TestEventHandler>();
             //eventBus.Subscribe<TestEvent2, TestEvent2Handler>();
 
-            //logger.LogInformation("Program starting...");
-
-
-            Console.WriteLine("Programing starting...");
+            logger.LogInformation("Program starting...");
 
             var _connection = serviceProvider.GetRequiredService<IRabbitMQPersistentConnection>();
             if (!_connection.IsConnected)
@@ -111,17 +113,28 @@ namespace EventBusConsole
                     var routingKey = ea.RoutingKey;
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
-                    Console.WriteLine("{0}:{1}", routingKey, message);
+                    logger.LogInformation("{0}:{1}", routingKey, message);
+                    ProcessEvent(container, routingKey, message);
                 };
 
-                channel.BasicConsume(queue: queueName,
-                               autoAck: true,
-                               consumer: consumer);
+                channel.BasicConsume(queue: queueName, autoAck: false, consumer: consumer);
 
                 Console.ReadLine();
             }
 
             #endregion
+        }
+
+        private static void ProcessEvent(IContainer container, string eventName, string message)
+        {
+            using (var scope = container.BeginLifetimeScope("HugoScope"))
+            {
+                var handler = scope.ResolveOptional<ICaculateService>();
+
+                var concreteType = typeof(CaculateService);
+
+                concreteType.GetMethod($"{eventName}Async").Invoke(handler, new object[] { message });
+            }
         }
 
 

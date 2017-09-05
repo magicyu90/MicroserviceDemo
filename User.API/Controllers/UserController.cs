@@ -67,9 +67,6 @@ namespace User.API.Controllers
             using (var channel = _connection.CreateModel())
             {
                 channel.ExchangeDeclare(exchangeName, ExchangeType.Direct);
-                //var queue = channel.QueueDeclare("queueTest", durable: true, exclusive: false, autoDelete: false, arguments: null);
-                //channel.QueueBind("queueTest", exchangeName, "TestEvent");
-                //channel.QueueBind("queueTest", exchangeName, "TestEvent2");
 
                 var eventMesage = new TestEvent("Test Event");
                 var eventMessage2 = new TestEvent2("Test event2...");

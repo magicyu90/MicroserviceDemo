@@ -48,7 +48,7 @@ namespace User.API
                 return new DefaultRabbitMQPersisterConnection(factory, _logger);
             });
 
-            RegisterEventBus(services);
+            //RegisterEventBus(services);
 
             services.AddTransient<IUserRepository, UserRepository>();
 

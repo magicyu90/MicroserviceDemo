@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using IntegrationEvents.Events;
 using Microservice.BuildingBlocks.EventBus.Abstractions;
-using User.API.Repositories;
-using User.API.IntegrationEvents.Events;
-using IntegrationEvents.Events;
+using Microservice.BuildingBlocks.EventBusRabbitMQ;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using RabbitMQ.Client;
+using System.Text;
+using User.API.Repositories;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -16,17 +15,24 @@ namespace User.API.Controllers
     [Route("api/[controller]")]
     public class UserController : Controller
     {
-        private readonly IEventBus _eventBus;
+        // private readonly IEventBus _eventBus;
         private readonly IUserRepository _userRepository;
 
         private readonly ILogger _logger;
+        private readonly IRabbitMQPersistentConnection _connection;
 
 
-        public UserController(IEventBus eventBus, IUserRepository userRepository, ILogger<UserController> logger)
+        private readonly string exchangeName = "microservice_exchange";
+        private readonly string queueName = "microservice_queue";
+
+
+        public UserController(IUserRepository userRepository, ILogger<UserController> logger, IRabbitMQPersistentConnection rabbitMQConnection)
         {
-            _eventBus = eventBus;
+            //_eventBus = eventBus;
             _userRepository = userRepository;
             _logger = logger;
+            _connection = rabbitMQConnection;
+
         }
 
         [HttpDelete("{id}")]
@@ -34,12 +40,24 @@ namespace User.API.Controllers
         {
             _logger.LogInformation($"Delete id:{id}");
 
-            var testEventMessage = new IntegrationEvents.Events.TestEvent("This is the test message for test event by Hugo");
-            _eventBus.Publish(testEventMessage);
+            if (!_connection.IsConnected)
+            {
+                _connection.TryConnect();
+            }
+            using (var channel = _connection.CreateModel())
+            {
+                channel.QueueDeclare(queueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
 
-            var testEvent2Message = new IntegrationEvents.Events.TestEvent2("This is the test message for test event2 by Hugo");
-            _eventBus.Publish(testEvent2Message);
+                var eventMessage = new TestEvent("Test event...");
 
+                var eventMessage2 = new TestEvent2("Test event2...");
+
+                var msgBody = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(eventMessage));
+                var msgBody2 = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(eventMessage2));
+
+                channel.BasicPublish("", queueName, null, msgBody);
+                channel.BasicPublish("", queueName, null, msgBody2);
+            }
 
             return Json("OK");
 

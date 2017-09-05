@@ -22,7 +22,7 @@ namespace User.API.Controllers
         private readonly IRabbitMQPersistentConnection _connection;
 
 
-        private readonly string exchangeName = "microservice_exchange";
+        private readonly string exchangeName = "test_exchange";
         private readonly string queueName = "microservice_queue";
 
 
@@ -44,20 +44,46 @@ namespace User.API.Controllers
             {
                 _connection.TryConnect();
             }
+
+            #region 简单的工作队列模式
+            //using (var channel = _connection.CreateModel())
+            //{
+            //    channel.QueueDeclare(queueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
+
+            //    var eventMessage = new TestEvent("Test event...");
+
+            //    var eventMessage2 = new TestEvent2("Test event2...");
+
+            //    var msgBody = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(eventMessage));
+            //    var msgBody2 = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(eventMessage2));
+
+            //    channel.BasicPublish("", queueName, null, msgBody);
+            //    channel.BasicPublish("", queueName, null, msgBody2);
+            //}
+            #endregion
+
+
+            #region 生产者-消费者模式
             using (var channel = _connection.CreateModel())
             {
-                channel.QueueDeclare(queueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
+                channel.ExchangeDeclare(exchangeName, ExchangeType.Direct);
+                //var queue = channel.QueueDeclare("queueTest", durable: true, exclusive: false, autoDelete: false, arguments: null);
+                //channel.QueueBind("queueTest", exchangeName, "TestEvent");
+                //channel.QueueBind("queueTest", exchangeName, "TestEvent2");
 
-                var eventMessage = new TestEvent("Test event...");
-
+                var eventMesage = new TestEvent("Test Event");
                 var eventMessage2 = new TestEvent2("Test event2...");
 
-                var msgBody = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(eventMessage));
+                var msgBody = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(eventMesage));
                 var msgBody2 = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(eventMessage2));
 
-                channel.BasicPublish("", queueName, null, msgBody);
-                channel.BasicPublish("", queueName, null, msgBody2);
+                channel.BasicPublish(exchangeName, "TestEvent", null, msgBody);
+                channel.BasicPublish(exchangeName, "TestEvent2", null, msgBody2);
             }
+
+
+            #endregion
+
 
             return Json("OK");
 

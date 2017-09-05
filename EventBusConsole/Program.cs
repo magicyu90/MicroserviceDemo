@@ -17,7 +17,7 @@ namespace EventBusConsole
     class Program
     {
 
-        private static string exchangeName = "microservice_exchange";
+        private static string exchangeName = "test_exchange";
         private static string queueName = "microservice_queue";
         static void Main(string[] args)
         {
@@ -64,32 +64,66 @@ namespace EventBusConsole
             {
                 _connection.TryConnect();
             }
+
+            #region 简单的工作队列模式
+            //using (var channel = _connection.CreateModel())
+            //{
+            //    //在MQ上定义一个持久化队列，如果名称相同不会重复创建
+            //    channel.QueueDeclare(queueName, true, false, false, null);
+
+            //    Console.WriteLine("Listening...");
+
+            //    //在队列上定义一个消费者
+            //    var consumer = new EventingBasicConsumer(channel);
+
+            //    consumer.Received += (model, ea) =>
+            //    {
+            //        var body = ea.Body;
+            //        var message = Encoding.UTF8.GetString(body);
+            //        Console.WriteLine(" [x] Received {0}", message);
+            //        channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+            //    };
+
+            //    //消费队列，并设置应答模式为程序主动应答
+            //    channel.BasicConsume(queueName, false, consumer);
+
+            //    Console.ReadLine();
+
+            //}
+            #endregion
+
+            #region 生产者-消费者模式
             using (var channel = _connection.CreateModel())
             {
-                //在MQ上定义一个持久化队列，如果名称相同不会重复创建
-                channel.QueueDeclare(queueName, true, false, false, null);
+                channel.ExchangeDeclare(exchangeName, ExchangeType.Direct);
+
+                // var queue = channel.QueueDeclare("queueTest", durable: true, exclusive: false, autoDelete: false, arguments: null);
+                var queueName = channel.QueueDeclare().QueueName;
 
                 Console.WriteLine("Listening...");
 
-                //在队列上定义一个消费者
-                var consumer = new EventingBasicConsumer(channel);
+                channel.QueueBind(queueName, exchangeName, "TestEvent");
+                channel.QueueBind(queueName, exchangeName, "TestEvent2");
 
+                var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (model, ea) =>
                 {
+                    var routingKey = ea.RoutingKey;
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
-                    Console.WriteLine(" [x] Received {0}", message);
-                    channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+                    Console.WriteLine("{0}:{1}", routingKey, message);
                 };
 
-                //消费队列，并设置应答模式为程序主动应答
-                channel.BasicConsume(queueName, false, consumer);
+                channel.BasicConsume(queue: queueName,
+                               autoAck: true,
+                               consumer: consumer);
 
                 Console.ReadLine();
-
             }
 
-            Console.Read();
+            #endregion
         }
+
+
     }
 }

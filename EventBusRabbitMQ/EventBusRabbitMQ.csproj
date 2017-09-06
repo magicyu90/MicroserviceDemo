@@ -15,4 +15,10 @@
     <ProjectReference Include="..\EventBus\EventBus.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="NSTS.DataStore">
+      <HintPath>..\..\..\nuctech projects\NSTS.DataStore\bin\Debug\netstandard1.6\NSTS.DataStore.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

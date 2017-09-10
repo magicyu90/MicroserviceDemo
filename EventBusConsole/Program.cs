@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -97,7 +98,11 @@ namespace EventBusConsole
             #region 生产者-消费者模式
             using (var channel = _connection.CreateModel())
             {
-                channel.ExchangeDeclare(exchangeName, ExchangeType.Direct);
+
+                Dictionary<string, object> arguments = new Dictionary<string, object>();
+                arguments.Add("x-delayed-type", "direct");
+
+                channel.ExchangeDeclare(exchangeName, "x-delayed-message", true, false, arguments);
 
                 // var queue = channel.QueueDeclare("queueTest", durable: true, exclusive: false, autoDelete: false, arguments: null);
                 var queueName = channel.QueueDeclare().QueueName;
@@ -121,6 +126,8 @@ namespace EventBusConsole
 
                 Console.ReadLine();
             }
+
+            Console.ReadLine();
 
             #endregion
         }
